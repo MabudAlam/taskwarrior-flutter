@@ -129,12 +129,23 @@ jobs:
           echo $FDROID_CONFIG_YML_B64 | base64 --decode > config.yml
           echo $FDROID_KEYSTORE_P12_B64 | base64 --decode > keystore.p12
 
-          # Install fdroidserver
+          # apt still supplies aapt/apksigner/zipalign; python3-venv is for the
+          # isolated F-Droid install below.
           sudo apt-get update
-          sudo apt-get install -y fdroidserver
+          sudo apt-get install -y fdroidserver python3-venv
+
+          # The distro fdroidserver (2.2.1) ships with androguard 3.4.0a1,
+          # whose resources.arsc parser cannot read APKs built with
+          # compileSdk 36 / targetSdk 36 — it dies with
+          # "ResParserError: res1 must be zero!". Pin a matched, newer pair in
+          # a venv. Note the override cannot be done in place: fdroidserver
+          # 2.2.1 imports androguard.core.bytecodes, which 4.x removed.
+          python3 -m venv .fdroid-venv
+          .fdroid-venv/bin/pip install --upgrade pip
+          .fdroid-venv/bin/pip install "fdroidserver==2.4.5" "androguard==4.1.4"
 
           # Run the update command
-          fdroid update -c
+          .fdroid-venv/bin/fdroid update -c
 
       # Step 10b: Record the deploy and rebuild the site from this branch's own
       # source, then place it at the root. Additions only — repo/, metadata/ and

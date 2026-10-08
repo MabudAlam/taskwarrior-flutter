@@ -156,3 +156,12 @@ Join the CCExtractor community on Zulip for questions, discussions, and contribu
 ## License
 
 Distributed under the GNU General Public License v3.0. See [`LICENSE`](LICENSE) for the full text.
+
+<!--
+Fork CI test marker (branch: fdroid-test).
+
+This commit exists only to carry the branch so the "Nightly F-Droid CI"
+workflow can be run from the fork against the pinned fdroidserver/androguard
+change without touching main. It is not part of the upstream change and can be
+dropped before any pull request is opened.
+-->
