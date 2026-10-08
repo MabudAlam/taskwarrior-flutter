@@ -151,6 +151,9 @@ jobs:
           # and metadata generation complete. The publish step is guarded off,
           # so this key never leaves the run. Upstream is untouched.
           if [ "${{ github.repository }}" != "CCExtractor/taskwarrior-flutter" ]; then
+            # The decoded keystore.p12 exists but is empty in this setup, and
+            # keytool refuses to write over an empty existing file.
+            rm -f keystore.p12
             keytool -genkeypair -keystore keystore.p12 -storetype PKCS12 \
               -alias fdroid -storepass forkpass -keypass forkpass \
               -dname "CN=fork test" -keyalg RSA -keysize 2048 -validity 30 -noprompt
