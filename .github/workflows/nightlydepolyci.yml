@@ -144,6 +144,28 @@ jobs:
           .fdroid-venv/bin/pip install --upgrade pip
           .fdroid-venv/bin/pip install "fdroidserver==2.4.5" "androguard==4.1.4"
 
+          # Fork-only test scaffolding. The fork's FDROID_CONFIG_YML secret
+          # carries no keystore credentials (upstream's does), so `fdroid
+          # update` halts at assert_config_keystore before it can prove
+          # anything. Generate a throwaway key and a minimal config so the scan
+          # and metadata generation complete. The publish step is guarded off,
+          # so this key never leaves the run. Upstream is untouched.
+          if [ "${{ github.repository }}" != "CCExtractor/taskwarrior-flutter" ]; then
+            keytool -genkeypair -keystore keystore.p12 -storetype PKCS12 \
+              -alias fdroid -storepass forkpass -keypass forkpass \
+              -dname "CN=fork test" -keyalg RSA -keysize 2048 -validity 30 -noprompt
+            {
+              echo "repo_url: https://example.org/fdroid/repo"
+              echo "repo_name: Fork test"
+              echo "keystore: keystore.p12"
+              echo "keystorepass: forkpass"
+              echo "keypass: forkpass"
+              echo "repo_keyalias: fdroid"
+              echo "keydname: CN=fork test, O=fork, C=US"
+            } > config.yml
+            chmod 600 config.yml
+          fi
+
           # Run the update command
           .fdroid-venv/bin/fdroid update -c
 
