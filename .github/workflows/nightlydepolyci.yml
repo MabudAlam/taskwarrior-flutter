@@ -190,7 +190,11 @@ jobs:
       # Step 11: Push a fresh history with NO bloat
       # This creates a temporary orphan branch (no parents) containing ONLY
       # the files currently on disk, then force pushes it to replace fdroid-repo.
+      # Fork-test guard: skip the publish on any fork so a test run can never
+      # push to a F-Droid repo. It is a no-op on CCExtractor/taskwarrior-flutter,
+      # where the condition is true and the step runs as before.
       - name: Push F-Droid updates
+        if: github.repository == 'CCExtractor/taskwarrior-flutter'
         run: |
           # Create a temporary orphan branch (fresh start, no history)
           git checkout --orphan temp_deploy_branch
